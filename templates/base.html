@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLAS - Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="text-gray-200 min-h-screen bg-[#050505]">
+
+    <nav class="bg-[#09090a] border-b border-[#161618] px-6 py-3 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center space-x-8">
+            <div class="text-white font-black text-xl tracking-widest flex items-center space-x-2">
+                <a href="/dashboard" class="cursor-pointer tracking-wider font-sans font-bold">ATLAS</a>
+                <span class="bg-[#161618] text-[10px] font-mono px-2 py-0.5 rounded text-gray-400 border border-[#222]">
+                    LTC $56.11
+                </span>
+            </div>
+            
+            <div class="hidden md:flex space-x-1 text-sm font-medium">
+                <a href="/dashboard" class="nav-btn text-gray-400 hover:text-white px-4 py-1.5 rounded-lg transition {% if active_tab == 'dashboard' %}active-tab-btn{% endif %}">Dashboard</a>
+                <a href="/purchase" class="nav-btn text-gray-400 hover:text-white px-4 py-1.5 rounded-lg transition {% if active_tab == 'purchase' %}active-tab-btn{% endif %}">Purchase</a>
+                <a href="/topup" class="nav-btn text-gray-400 hover:text-white px-4 py-1.5 rounded-lg transition {% if active_tab == 'topup' %}active-tab-btn{% endif %}">Topup</a>
+                <a href="/subscribers" class="nav-btn text-gray-400 hover:text-white px-4 py-1.5 rounded-lg transition {% if active_tab == 'subscribers' %}active-tab-btn{% endif %}">Subscribers</a>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-4 text-sm">
+            <div class="flex items-center space-x-2 bg-[#111113] border border-[#1e1e21] px-3 py-1.5 rounded-full">
+                <img src="{{ avatar }}" class="w-5 h-5 rounded-full object-cover" alt="Avatar">
+                <span class="text-white font-medium font-mono text-xs">{{ username }}</span>
+            </div>
+            <a href="/logout" class="text-gray-500 hover:text-red-400 transition text-xs">Logout</a>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-6 md:p-8 page-fade">
+        {% block content %}{% endblock %}
+    </main>
+
+</body>
+</html>

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная | DARK</title>
+    <style>
+        :root {
+            --bg-main: #05070f;
+            --bg-card: #0b0e22;
+            --bg-input: #121834;
+            --text-color: #ffffff;
+            --text-muted: #626b8f;
+            --accent: #2e66ff;
+            --accent-hover: #1a4fd6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border: #1a224c;
+            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 30px; }
+        .logo { font-size: 22px; font-weight: 800; letter-spacing: 2px; color: #fff; text-decoration: none; }
+        nav { display: flex; gap: 20px; }
+        
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition-smooth);
+            will-change: transform, color;
+        }
+
+        nav a:hover, nav a.active { color: var(--text-color); transform: translateY(-1px); }
+        nav a.admin-link { color: var(--danger); font-weight: 600; }
+
+        .user-menu { display: flex; align-items: center; gap: 15px; }
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-input);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .avatar-mini {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--accent);
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        .username-txt { font-size: 13px; font-weight: 600; }
+        .btn-logout { color: var(--text-muted); text-decoration: none; font-size: 13px; transition: var(--transition-smooth); }
+        .btn-logout:hover { color: var(--danger); }
+
+        .announcement-bar {
+            background: linear-gradient(90deg, rgba(46, 102, 255, 0.08), rgba(16, 185, 129, 0.08));
+            border-bottom: 1px solid var(--border);
+            padding: 10px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--success);
+        }
+
+        main {
+            max-width: 1400px;
+            width: 100%;
+            margin: 30px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 30px;
+        }
+
+        .profile-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: fit-content;
+            transition: var(--transition-smooth);
+            will-change: transform, box-shadow;
+        }
+        .profile-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(46, 102, 255, 0.05);
+        }
+
+        .avatar-main {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--border);
+            box-shadow: 0 0 25px rgba(46, 102, 255, 0.15);
+            margin-bottom: 15px;
+            transition: var(--transition-smooth);
+        }
+
+        .profile-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+        
+        .role-tag {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .role-owner { background: rgba(239, 68, 68, 0.12); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.25); }
+        .role-user { background: rgba(46, 102, 255, 0.12); color: var(--accent); border: 1px solid rgba(46, 102, 255, 0.25); }
+
+        .info-rows { width: 100%; display: flex; flex-direction: column; gap: 14px; margin-bottom: 25px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .info-label { color: var(--text-muted); }
+        .info-value { font-weight: 600; }
+        .info-value.active-status { color: var(--success); }
+
+        .btn-primary {
+            width: 100%;
+            background-color: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+        }
+        .btn-primary:hover { background-color: var(--accent-hover); }
+
+        .right-content { display: flex; flex-direction: column; gap: 25px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        .stat-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition-smooth);
+        }
+
+        .stat-details p { font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; }
+        .stat-details h4 { font-size: 20px; font-weight: 700; }
+        
+        .btn-action-sm {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        .btn-action-sm:hover { border-color: var(--accent); color: var(--accent); }
+
+        .scripts-container { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 25px; }
+        .scripts-container h3 { font-size: 16px; margin-bottom: 20px; }
+        .script-list { display: flex; flex-direction: column; gap: 12px; }
+        
+        .script-item {
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition-smooth);
+        }
+
+        .script-info { display: flex; align-items: center; gap: 15px; }
+        .script-icon { width: 36px; height: 36px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .script-meta h5 { font-size: 14px; font-weight: 600; }
+        .script-meta p { font-size: 11px; color: var(--success); }
+        
+        .btn-manage {
+            background: rgba(46, 102, 255, 0.08);
+            color: var(--accent);
+            border: 1px solid rgba(46, 102, 255, 0.15);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        /* =====================================================================
+           СУПЕР-ПЛАВНЫЕ КОМПОНЕНТЫ ДЛЯ ВЫСПЛЫВАЮЩИХ ОКОН (МЕНЮШЕК)
+        ===================================================================== */
+        
+        /* 1. Модальное окно (Confirmation Overlay) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 4, 9, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: opacity;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal-window {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%; max-width: 400px;
+            transform: scale(0.9) translateY(10px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+        .modal-overlay.active .modal-window { transform: scale(1) translateY(0); }
+
+        .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .modal-text { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; }
+        .modal-buttons { display: flex; gap: 12px; justify-content: flex-end; }
+        
+        .btn-modal { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: var(--transition-smooth); }
+        .btn-modal-cancel { background: var(--bg-input); color: var(--text-color); border: 1px solid var(--border); }
+        .btn-modal-cancel:hover { border-color: var(--text-muted); }
+        .btn-modal-confirm { background: var(--danger); color: #fff; }
+        .btn-modal-confirm:hover { background: #dc2626; }
+
+        /* 2. Контейнер всплывающих уведомлений (Toasts) */
+        .toast-container {
+            position: fixed;
+            bottom: 24px; right: 24px;
+            display: flex; flex-direction: column; gap: 10px;
+            z-index: 1050; pointer-events: none;
+        }
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 14px 20px;
+            border-radius: 10px;
+            color: #fff; font-size: 13px; font-weight: 600;
+            display: flex; align-items: center; gap: 10px;
+            min-width: 280px; max-width: 380px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            pointer-events: auto;
+            opacity: 0; transform: translateY(20px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, opacity;
+        }
+        .toast.show { opacity: 1; transform: translateY(0) scale(1); }
+        .toast-success { border-left: 4px solid var(--success); }
+        .toast-error { border-left: 4px solid var(--danger); }
+    </style>
+</head>
+<body>
+
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-title">⚠️ Подтверждение действия</div>
+            <div class="modal-text">Вы действительно хотите сбросить привязку вашего HWID? Это действие нельзя отменить.</div>
+            <div class="modal-buttons">
+                <button class="btn-modal btn-modal-cancel" onclick="closeModal()">Отмена</button>
+                <button class="btn-modal btn-modal-confirm" id="modal-confirm-btn">Сбросить</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-box" class="toast-container"></div>
+
+    <header>
+        <div class="logo-section">
+            <a href="/" class="logo">DARK</a>
+            <nav>
+                <a href="/" class="active">Главная</a>
+                <a href="/subscriptions">Подписки</a>
+                <a href="/balance">Баланс</a>
+                <a href="/promocodes">Промокоды</a>
+                <a href="/support">Техподдержка</a>
+                {% if is_owner == 1 or is_moderator == 1 %}
+                    <a href="/admin" class="admin-link">[ADMIN PANEL]</a>
+                {% endif %}
+            </nav>
+        </div>
+        <div class="user-menu">
+            <div class="user-badge">
+                <img src="{{ avatar }}" class="avatar-mini" alt="Avatar">
+                <span class="username-txt">{{ username }}</span>
+            </div>
+            <a href="/logout" class="btn-logout">Выйти</a>
+        </div>
+    </header>
+
+    <div class="announcement-bar">⚡ {{ global_announcement }}</div>
+
+    <main>
+        <div class="profile-card">
+            <img src="{{ avatar }}" class="avatar-main" alt="User Avatar">
+            <h3>@{{ username }}</h3>
+            
+            {% if is_owner == 1 %}
+                <span class="role-tag role-owner">Owner Access</span>
+            {% else %}
+                <span class="role-tag role-user">User Access</span>
+            {% endif %}
+
+            <div class="info-rows">
+                <div class="info-row">
+                    <span class="info-label">Тариф:</span>
+                    <span class="info-value" style="color: var(--accent);">{{ plan }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Статус:</span>
+                    <span class="info-value active-status">{{ status }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Баланс:</span>
+                    <span class="info-value" style="color: #10b981;">${{ balance }}</span>
+                </div>
+            </div>
+            <a href="/balance" class="btn-primary">Пополнить</a>
+        </div>
+
+        <div class="right-content">
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-details">
+                        <p>Текущий привязанный HWID</p>
+                        <h4 id="hwid-text" style="font-size: 13px; color: var(--text-muted); font-family: monospace;">{{ hwid }}</h4>
+                    </div>
+                    <button class="btn-action-sm" onclick="askResetHwid()">Сбросить</button>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-details">
+                        <p>Запуски сессий</p>
+                        <h4><span style="color: var(--success);">{{ executions }}</span> сессий</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scripts-container">
+                <h3>Активные Скрипты и Проекты</h3>
+                <div class="script-list">
+                    <div class="script-item">
+                        <div class="script-info">
+                            <div class="script-icon">🤖</div>
+                            <div class="script-meta"><h5>Project Titan Farm</h5><p>Running • Авто-фарм активен</p></div>
+                        </div>
+                        <button class="btn-manage" onclick="showToast('Управление скриптом временно недоступно', 'error')">Управлять</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Функция плавного показа уведомлений (Toasts)
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-box');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 50);
+
+            // Удаление через 3.5 секунды
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Логика кастомной модалки
+        function askResetHwid() {
+            const modal = document.getElementById('custom-modal');
+            modal.classList.add('active');
+            
+            document.getElementById('modal-confirm-btn').onclick = async function() {
+                closeModal();
+                let response = await fetch("/api/user/reset-hwid", { method: "POST" });
+                if(response.ok) {
+                    showToast("HWID успешно сброшен!", "success");
+                    document.getElementById("hwid-text").innerText = "NOT_BOUND";
+                } else {
+                    showToast("Не удалось сбросить HWID", "error");
+                }
+            };
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>

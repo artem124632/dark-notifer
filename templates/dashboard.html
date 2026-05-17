@@ -1,0 +1,110 @@
+<div class="space-y-8 relative">
+
+    {% if bought_flag == 1 %}
+    <div id="modal-67" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 animate-fade">
+        <div class="bg-[#0b0b0c] border-2 border-green-500/50 w-full max-w-sm p-8 rounded-2xl text-center space-y-4 shadow-2xl shadow-green-500/5">
+            <div class="text-xs font-mono tracking-widest text-green-400 uppercase">Product Registered</div>
+            
+            <div class="text-7xl font-black text-white font-sans select-none tracking-tight animate-pulse">67</div>
+            
+            <p class="text-gray-400 text-xs leading-relaxed">Ваша трансляция успешно подтверждена. Данные синхронизированы с нодой.</p>
+            
+            <button onclick="closeModal67()" class="w-full bg-[#122e1f] hover:bg-[#1a402b] text-green-400 font-bold text-xs py-2.5 rounded-xl border border-[#1e4a32] transition">
+                Понятно
+            </button>
+        </div>
+    </div>
+    <script>
+        async function closeModal67() {
+            document.getElementById('modal-67').style.display = 'none';
+            // Отправляем запрос серверу, чтобы больше не показывать это окно до следующей покупки
+            await fetch('/api/dismiss-window', { method: 'POST' });
+        }
+    </script>
+    {% endif %}
+
+    <div>
+        <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Welcome Back, {{ username }}</h1>
+        <p class="text-gray-500 text-xs mt-1">Manage your subscription and account settings</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card-bg rounded-xl p-5 flex flex-col justify-between h-32 border-l-2 {% if plan != 'No Plan' %}border-green-500{% else %}border-zinc-800{% endif %}">
+            <div class="text-gray-500 text-[10px] font-bold uppercase tracking-wider flex justify-between items-center">
+                <span>Balance</span>
+                <span class="text-green-500 text-xs">📁</span>
+            </div>
+            <div class="text-2xl font-bold text-white">${{ balance }}</div>
+            <button onclick="location.href='/purchase'" class="w-full bg-[#122e1f] border border-[#1e4a32] text-green-400 text-[10px] font-medium py-1 rounded-md transition flex items-center justify-center space-x-1">
+                <span>🔄</span> <span>Top Up Balance</span>
+            </button>
+        </div>
+
+        <div class="card-bg rounded-xl p-5 flex flex-col justify-between h-32">
+            <div class="text-gray-500 text-[10px] font-bold uppercase tracking-wider flex justify-between items-center">
+                <span>Delay</span>
+                <span class="text-blue-400 text-xs">🕒</span>
+            </div>
+            <div class="text-2xl font-bold text-white">{{ delay }}</div>
+            <div class="w-full bg-[#161618] h-1 rounded-full overflow-hidden"></div>
+        </div>
+
+        <div class="card-bg rounded-xl p-5 flex flex-col justify-between h-32">
+            <div class="text-gray-500 text-[10px] font-bold uppercase tracking-wider flex justify-between items-center">
+                <span>Status</span>
+                <span class="text-purple-400 text-xs">📈</span>
+            </div>
+            <div class="text-2xl font-bold {% if status == 'Active' %}text-green-500{% else %}text-red-500{% endif %}">{{ status }}</div>
+            <div class="w-full bg-[#161618] h-1 rounded-full overflow-hidden"></div>
+        </div>
+
+        <div class="card-bg rounded-xl p-5 flex flex-col justify-between h-32">
+            <div class="text-gray-500 text-[10px] font-bold uppercase tracking-wider flex justify-between items-center">
+                <span>Plan</span>
+                <span class="text-amber-500 text-xs">🏅</span>
+            </div>
+            <div class="text-xl font-bold text-gray-400 truncate">{{ plan }}</div>
+            <div class="w-full bg-[#161618] h-1 rounded-full overflow-hidden"></div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="card-bg rounded-xl p-6">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">Your Execution Script Code</h3>
+                <div class="bg-[#050505] border border-[#161618] rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-3">
+                    <div class="text-blue-500 text-xl">🛡️</div>
+                    <div class="w-full text-left text-white font-mono text-[11px] select-all bg-[#0a0a0b] p-3 rounded-lg border border-[#18181a] overflow-x-auto whitespace-nowrap">
+                        _G.DarkToken = "MTUwNDE1MTkwNDYxODU0NTI3Mw.GSd3L4.vzQCR7PpVukmd3lLEOmr3ZpJMQy3sDKSQToCFg"; loadstring(game:HttpGet("http://127.0.0.1:8000/static/atlas_script.lua"))()
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-bg rounded-xl p-6">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">Recent Transactions</h3>
+                <div class="space-y-2">
+                    {% for tx in transactions %}
+                    <div class="bg-[#050505] border border-[#161618] p-3 rounded-lg flex justify-between items-center text-xs">
+                        <div class="flex items-center space-x-3">
+                            <span class="{% if '-' in tx.amount %}text-red-400{% else %}text-green-400{% endif %} font-mono font-bold">{{ tx.amount }}</span>
+                            <span class="text-white font-medium">{{ tx.type }}</span>
+                        </div>
+                        <span class="text-gray-500 text-[11px] font-mono">{{ tx.date }}</span>
+                    </div>
+                    {% else %}
+                    <div class="flex flex-col items-center justify-center text-center py-6 text-gray-600">
+                        <span class="text-lg">📊</span>
+                        <span class="text-xs font-medium mt-1">No transactions yet</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card-bg rounded-xl p-6 space-y-2.5 h-fit">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Quick Actions</h3>
+            <button onclick="alert('HWID Сброшен!')" class="w-full bg-[#2a1b40] hover:bg-[#34214f] text-purple-300 border border-[#442c69] text-xs font-semibold py-2.5 rounded-xl transition">🔄 Reset HWID (0)</button>
+            <button onclick="location.href='/purchase'" class="w-full bg-[#122e1f] hover:bg-[#183d29] text-green-300 border border-[#1e4a32] text-xs font-semibold py-2.5 rounded-xl transition">💲 Purchase Plan</button>
+        </div>
+    </div>
+</div>
