@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Техподдержка | DARK</title>
+    <style>
+        :root {
+            --bg-main: #060814;
+            --bg-card: #0b0e22;
+            --bg-input: #121834;
+            --text-color: #ffffff;
+            --text-muted: #626b8f;
+            --accent: #2e66ff;
+            --accent-hover: #1a4fd6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border: #1a224c;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column; }
+
+        header { background-color: var(--bg-card); border-bottom: 1px solid var(--border); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 30px; }
+        .logo { font-size: 22px; font-weight: 800; letter-spacing: 2px; color: #fff; text-decoration: none; }
+        nav { display: flex; gap: 20px; }
+        nav a { color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500; }
+        nav a:hover, nav a.active { color: var(--text-color); }
+        {% if is_owner == 1 or is_moderator == 1 %} nav a.admin-link { color: var(--danger); font-weight: 600; } {% endif %}
+        .user-menu { display: flex; align-items: center; gap: 15px; }
+        .user-badge { display: flex; align-items: center; gap: 10px; background: var(--bg-input); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); }
+        .avatar-mini { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid var(--accent); }
+
+        .announcement-bar { background: linear-gradient(90deg, rgba(46, 102, 255, 0.1), rgba(16, 185, 129, 0.1)); border-bottom: 1px solid var(--border); padding: 10px; text-align: center; font-size: 13px; color: var(--success); }
+
+        main { max-width: 1400px; width: 100%; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 400px 1fr; gap: 30px; }
+        
+        .create-box { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 25px; height: fit-content; }
+        .create-box h3 { font-size: 16px; margin-bottom: 20px; }
+        
+        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+        .form-group label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+        .form-group input, .form-group textarea { background-color: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: #fff; font-size: 14px; outline: none; }
+        .form-group textarea { height: 120px; resize: none; }
+        
+        .btn-create { width: 100%; background-color: var(--accent); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        
+        .tickets-box { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 25px; }
+        .tickets-box h3 { font-size: 16px; margin-bottom: 20px; }
+        
+        .ticket-list { display: flex; flex-direction: column; gap: 12px; }
+        .ticket-item { background: var(--bg-main); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .ticket-title { font-size: 14px; font-weight: 600; }
+        .ticket-status { font-size: 11px; font-weight: 700; background: rgba(16, 185, 129, 0.15); color: var(--success); padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-section">
+            <a href="/" class="logo">DARK</a>
+            <nav>
+                <a href="/">Главная</a>
+                <a href="/">Подписки</a>
+                <a href="/balance">Баланс</a>
+                <a href="/promocodes">Промокоды</a>
+                <a href="/support" class="active">Техподдержка</a>
+                {% if is_owner == 1 or is_moderator == 1 %} <a href="/admin" class="admin-link">[ADMIN PANEL]</a> {% endif %}
+            </nav>
+        </div>
+        <div class="user-menu">
+            <div class="user-badge">
+                <img src="{{ avatar }}" class="avatar-mini" alt="Avatar">
+                <span class="username-txt">{{ username }}</span>
+            </div>
+            <a href="/logout" style="color:var(--text-muted); text-decoration:none; font-size:13px;">Выйти</a>
+        </div>
+    </header>
+
+    <div class="announcement-bar">⚡ {{ global_announcement }}</div>
+
+    <main>
+        <div class="create-box">
+            <h3>Создать обращение</h3>
+            <div class="form-group">
+                <label>Тема проблемы</label>
+                <input type="text" id="ticket-title" placeholder="Не работает скрипт / ошибка">
+            </div>
+            <div class="form-group">
+                <label>Описание ситуации</label>
+                <textarea id="ticket-msg" placeholder="Опишите вашу проблему максимально подробно..."></textarea>
+            </div>
+            <button class="btn-create" onclick="sendTicket()">Открыть тикет</button>
+        </div>
+
+        <div class="tickets-box">
+            <h3>Ваши активные обращения</h3>
+            <div class="ticket-list">
+                {% if tickets %}
+                    {% for t in tickets %}
+                        <div class="ticket-item">
+                            <span class="ticket-title">#{{ t.id }} — {{ t.title }}</span>
+                            <span class="ticket-status">{{ t.status }}</span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="font-size: 13px; color: var(--text-muted); text-align: center; padding: 20px 0;">У вас пока нет открытых обращений.</p>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function sendTicket() {
+            let title = document.getElementById("ticket-title").value;
+            let msg = document.getElementById("ticket-msg").value;
+            if(!title || !msg) return alert("Заполните поля!");
+            
+            let res = await fetch("/api/tickets/create", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ title: title, first_message: msg })
+            });
+            if(res.ok) {
+                alert("Тикет успешно создан!");
+                window.location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

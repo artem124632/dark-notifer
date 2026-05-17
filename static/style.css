@@ -1,0 +1,33 @@
+/* Плавное изменение для всех кнопок, карточек и ссылок */
+* {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
+}
+
+/* Эффект матового стекла для карточек тарифов и панелей */
+.card, .profile-panel, .modal {
+    background: rgba(20, 20, 20, 0.75);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+/* Красивое плавное увеличение при наведении на тарифы */
+.card:hover {
+    transform: translateY(-4px);
+    border-color: #00ff66; /* Зеленое свечение */
+    box-shadow: 0 8px 24px rgba(0, 255, 102, 0.15);
+}
+
+/* Стили для кнопок покупки */
+.btn-buy {
+    background: linear-gradient(135deg, #00ff66, #00b347);
+    color: #000;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-buy:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 0 15px rgba(0, 255, 102, 0.4);
+}

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ Панель | DARK</title>
+    <style>
+        :root {
+            --bg-main: #05070f;
+            --bg-card: #0b0e22;
+            --bg-input: #121834;
+            --text-color: #ffffff;
+            --text-muted: #626b8f;
+            --accent: #2e66ff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border: #1a224c;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column; }
+
+        header { background-color: var(--bg-card); border-bottom: 1px solid var(--border); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 30px; }
+        .logo { font-size: 22px; font-weight: 800; letter-spacing: 2px; color: #fff; text-decoration: none; }
+        nav { display: flex; gap: 20px; }
+        nav a { color: var(--text-muted); text-decoration: none; font-size: 14px; transition: var(--transition); }
+        nav a:hover, nav a.active { color: var(--text-color); }
+        nav a.admin-link { color: var(--danger); font-weight: 600; }
+        
+        .user-menu { display: flex; align-items: center; gap: 15px; }
+        .user-badge { display: flex; align-items: center; gap: 10px; background: var(--bg-input); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); }
+        .avatar-mini { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+
+        .announcement-bar { background: rgba(239, 68, 68, 0.08); border-bottom: 1px solid var(--border); padding: 10px; text-align: center; font-size: 13px; color: var(--danger); font-weight: 600; }
+
+        main { max-width: 1400px; width: 100%; margin: 40px auto; padding: 0 20px; flex: 1; }
+        .panel-container { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 30px; }
+        .panel-container h2 { font-size: 22px; margin-bottom: 25px; }
+
+        .users-table-wrapper { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th, td { padding: 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 11px; }
+        
+        .user-cell { display: flex; align-items: center; gap: 12px; }
+        .user-table-avatar { width: 32px; height: 32px; border-radius: 50%; }
+
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .badge-active { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .badge-none { background: rgba(98, 107, 143, 0.15); color: var(--text-muted); }
+        .badge-banned { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+
+        .actions-cell { display: flex; gap: 10px; align-items: center; }
+        .admin-input { background: var(--bg-main); border: 1px solid var(--border); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 13px; width: 90px; outline: none; }
+        .admin-select { background: var(--bg-main); border: 1px solid var(--border); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; outline: none; }
+
+        .btn-adm { border: none; padding: 8px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: var(--transition); color: #fff; }
+        .btn-adm-give { background-color: var(--success); }
+        .btn-adm-ban { background-color: var(--danger); }
+
+        /* =====================================================================
+           СИСТЕМНЫЕ КЛИЕНТСКИЕ МЕНЮШКИ ДЛЯ АДМИНКИ
+        ===================================================================== */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 4, 9, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal-window {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%; max-width: 400px;
+            transform: scale(0.95);
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .modal-overlay.active .modal-window { transform: scale(1); }
+        .modal-buttons { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+
+        .toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 1050; }
+        .toast { background: var(--bg-card); border: 1px solid var(--border); padding: 14px 20px; border-radius: 10px; color: #fff; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; min-width: 280px; opacity: 0; transform: translateY(10px); transition: all 0.2s ease; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast-success { border-left: 4px solid var(--success); }
+        .toast-error { border-left: 4px solid var(--danger); }
+    </style>
+</head>
+<body>
+
+    <div id="admin-modal" class="modal-overlay">
+        <div class="modal-window">
+            <h3 style="margin-bottom: 10px;">Блокировка аккаунта</h3>
+            <p id="modal-text-content" style="font-size: 14px; color: var(--text-muted);"></p>
+            <div class="modal-buttons">
+                <button class="btn-adm" style="background: var(--bg-input);" onclick="closeAdminModal()">Отмена</button>
+                <button class="btn-adm btn-adm-ban" id="modal-action-btn">Заблокировать</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-box" class="toast-container"></div>
+
+    <header>
+        <div class="logo-section">
+            <a href="/" class="logo">DARK</a>
+            <nav>
+                <a href="/">Главная</a>
+                <a href="/subscriptions">Подписки</a>
+                <a href="/balance">Баланс</a>
+                <a href="/promocodes">Промокоды</a>
+                <a href="/support">Техподдержка</a>
+                <a href="/admin" class="admin-link active">[ADMIN PANEL]</a>
+            </nav>
+        </div>
+        <div class="user-menu">
+            <div class="user-badge">
+                <img src="{{ avatar }}" class="avatar-mini" alt="Avatar">
+                <span class="username-txt">{{ username }}</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="announcement-bar">🛡️ Внимание! Вы находитесь в режиме администратора системы.</div>
+
+    <main>
+        <div class="panel-container">
+            <h2>Управление пользователями базы данных ({{ all_users|length }})</h2>
+            <div class="users-table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Пользователь</th>
+                            <th>Тариф</th>
+                            <th>Статус</th>
+                            <th>Баланс</th>
+                            <th>HWID</th>
+                            <th>Управление клиентом</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in all_users %}
+                        <tr>
+                            <td>
+                                <div class="user-cell">
+                                    <img src="{{ u.avatar }}" class="user-table-avatar" alt="Avatar">
+                                    <div>
+                                        <div style="font-weight:600;">@{{ u.username }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge {% if u.plan != 'None' %}badge-active{% else %}badge-none{% endif %}">{{ u.plan }}</span></td>
+                            <td>
+                                {% if u.is_banned == 1 %}
+                                    <span class="badge badge-banned">Banned</span>
+                                {% else %}
+                                    <span class="badge {% if u.status == 'Active' %}badge-active{% else %}badge-none{% endif %}">{{ u.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="color:#10b981; font-weight:600;">${{ u.balance|round(2) }}</td>
+                            <td style="font-family:monospace; font-size:12px;">{{ u.hwid }}</td>
+                            <td>
+                                <div class="actions-cell">
+                                    <input type="number" id="bal-{{ u.username }}" class="admin-input" placeholder="+$">
+                                    <button class="btn-adm btn-adm-give" onclick="giveBalance('{{ u.username }}')">Выдать</button>
+                                    
+                                    <select id="plan-{{ u.username }}" class="admin-select" onchange="setPlan('{{ u.username }}')">
+                                        <option value="None" {% if u.plan == 'None' %}selected{% endif %}>No Plan</option>
+                                        <option value="START" {% if u.plan == 'START' %}selected{% endif %}>START</option>
+                                        <option value="PRO" {% if u.plan == 'PRO' %}selected{% endif %}>PRO</option>
+                                        <option value="UNIVERSAL" {% if u.plan == 'UNIVERSAL' %}selected{% endif %}>UNIVERSAL</option>
+                                    </select>
+
+                                    {% if u.is_banned == 0 and u.is_owner == 0 %}
+                                        <button class="btn-adm btn-adm-ban" onclick="askBanUser('{{ u.username }}')">Бан</button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-box');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 50);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.remove('active');
+        }
+
+        async function sendAdminRequest(url, body) {
+            let res = await fetch(url, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(body)
+            });
+            if(res.ok) {
+                showToast("Действие выполнено успешно!");
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                let err = await res.json();
+                showToast(err.detail || "Ошибка запроса", "error");
+            }
+        }
+
+        function giveBalance(username) {
+            let val = document.getElementById("bal-" + username).value;
+            if(!val || parseFloat(val) <= 0) return showToast("Введите сумму", "error");
+            sendAdminRequest("/api/admin/give-balance", { target_username: username, amount: parseFloat(val) });
+        }
+
+        function setPlan(username) {
+            let plan = document.getElementById("plan-" + username).value;
+            sendAdminRequest("/api/admin/set-plan", { target_username: username, plan_name: plan });
+        }
+
+        function askBanUser(username) {
+            const modal = document.getElementById('admin-modal');
+            document.getElementById('modal-text-content').innerText = `Вы действительно хотите перманентно заблокировать пользователя @${username}?`;
+            modal.classList.add('active');
+            
+            document.getElementById('modal-action-btn').onclick = function() {
+                closeAdminModal();
+                sendAdminRequest("/api/admin/ban", { target_username: username });
+            };
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подписки | DARK</title>
+    <style>
+        :root {
+            --bg-main: #05070f;
+            --bg-card: #0b0e22;
+            --bg-input: #121834;
+            --text-color: #ffffff;
+            --text-muted: #626b8f;
+            --accent: #2e66ff;
+            --accent-hover: #1a4fd6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border: #1a224c;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column; }
+
+        header { background-color: var(--bg-card); border-bottom: 1px solid var(--border); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 30px; }
+        .logo { font-size: 22px; font-weight: 800; letter-spacing: 2px; color: #fff; text-decoration: none; }
+        nav { display: flex; gap: 20px; }
+        nav a { color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+        nav a:hover, nav a.active { color: var(--text-color); }
+        {% if is_owner == 1 or is_moderator == 1 %} nav a.admin-link { color: var(--danger); font-weight: 600; } {% endif %}
+        .user-menu { display: flex; align-items: center; gap: 15px; }
+        .user-badge { display: flex; align-items: center; gap: 10px; background: var(--bg-input); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); }
+        .avatar-mini { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid var(--accent); }
+
+        .announcement-bar { background: linear-gradient(90deg, rgba(46, 102, 255, 0.1), rgba(16, 185, 129, 0.1)); border-bottom: 1px solid var(--border); padding: 10px; text-align: center; font-size: 13px; color: var(--success); }
+
+        main { max-width: 1200px; width: 100%; margin: 40px auto; padding: 0 20px; flex: 1; }
+        .page-title { text-align: center; margin-bottom: 40px; }
+        .page-title h2 { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+        .page-title p { color: var(--text-muted); font-size: 15px; }
+        .user-current-balance { color: var(--success); font-weight: bold; }
+
+        .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 20px; }
+        .plan-item { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 35px 25px; display: flex; flex-direction: column; text-align: center; transition: transform 0.2s, border-color 0.2s; position: relative; overflow: hidden; }
+        .plan-item:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 25px rgba(46, 102, 255, 0.1); }
+        
+        .plan-item.popular { border-color: var(--accent); }
+        .plan-item.popular::before { content: "ПОПУЛЯРНОЕ"; position: absolute; top: 15px; right: -30px; background: var(--accent); color: white; font-size: 9px; font-weight: 700; padding: 4px 30px; transform: rotate(45deg); }
+
+        .plan-name { font-size: 20px; font-weight: 700; margin-bottom: 15px; }
+        .plan-price { font-size: 36px; font-weight: 800; margin-bottom: 25px; color: #fff; }
+        .plan-price span { font-size: 16px; color: var(--text-muted); font-weight: 400; }
+        
+        .plan-features { list-style: none; display: flex; flex-direction: column; gap: 12px; text-align: left; margin-bottom: 35px; color: var(--text-muted); font-size: 14px; }
+        .plan-features li::before { content: "✓ "; color: var(--success); font-weight: bold; margin-right: 5px; }
+
+        .btn-buy { width: 100%; background: var(--bg-input); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: auto; }
+        .plan-item:hover .btn-buy, .plan-item.popular .btn-buy { background: var(--accent); border-color: var(--accent); }
+        .plan-item .btn-buy:hover { background: var(--accent-hover) !important; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-section">
+            <a href="/" class="logo">DARK</a>
+            <nav>
+                <a href="/">Главная</a>
+                <a href="/subscriptions" class="active">Подписки</a>
+                <a href="/balance">Баланс</a>
+                <a href="/promocodes">Промокоды</a>
+                <a href="/support">Техподдержка</a>
+                {% if is_owner == 1 or is_moderator == 1 %} <a href="/admin" class="admin-link">[ADMIN PANEL]</a> {% endif %}
+            </nav>
+        </div>
+        <div class="user-menu">
+            <div class="user-badge">
+                <img src="{{ avatar }}" class="avatar-mini" alt="Avatar">
+                <span class="username-txt">{{ username }}</span>
+            </div>
+            <a href="/logout" class="btn-logout" style="color:var(--text-muted); text-decoration:none; font-size:13px;">Выйти</a>
+        </div>
+    </header>
+
+    <div class="announcement-bar">⚡ {{ global_announcement }}</div>
+
+    <main>
+        <div class="page-title">
+            <h2>Доступные тарифные планы</h2>
+            <p>Ваш текущий баланс: <span class="user-current-balance">${{ balance }}</span>. План активируется моментально.</p>
+        </div>
+
+        <div class="plans-grid">
+            <div class="plan-item">
+                <div class="plan-name">START</div>
+                <div class="plan-price">$5.00 <span>/ мес</span></div>
+                <ul class="plan-features">
+                    <li>Доступ к базовым скриптам</li>
+                    <li>Ограничение: 5 сессий одновременно</li>
+                    <li>Обновления раз в неделю</li>
+                    <li>Техподдержка в порядке очереди</li>
+                </ul>
+                <button class="btn-buy" onclick="buyPlan('START', 5.00)">Приобрести тариф</button>
+            </div>
+
+            <div class="plan-item popular">
+                <div class="plan-name">PRO</div>
+                <div class="plan-price">$15.00 <span>/ мес</span></div>
+                <ul class="plan-features">
+                    <li>Доступ ко всем приватным скриптам</li>
+                    <li>Ограничение: 25 сессий одновременно</li>
+                    <li>Мгновенный сброс HWID</li>
+                    <li>Приоритетные обновления скриптов</li>
+                    <li>Выделенная техподдержка</li>
+                </ul>
+                <button class="btn-buy" onclick="buyPlan('PRO', 15.00)">Приобрести тариф</button>
+            </div>
+
+            <div class="plan-item">
+                <div class="plan-name">UNIVERSAL</div>
+                <div class="plan-price">$35.00 <span>/ мес</span></div>
+                <ul class="plan-features">
+                    <li>Полный безлимит по функциям</li>
+                    <li>Безлимитные запуски сессий</li>
+                    <li>Автоматический обход всех систем защиты</li>
+                    <li>Доступ в закрытый VIP Discord чат</li>
+                    <li>Прямая связь с разработчиком</li>
+                </ul>
+                <button class="btn-buy" onclick="buyPlan('UNIVERSAL', 35.00)">Приобрести тариф</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function buyPlan(name, price) {
+            if(!confirm(`Вы действительно хотите купить тариф ${name} за $${price}?`)) return;
+            
+            let res = await fetch("/api/purchase-plan", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ plan_name: name, price: parseFloat(price) })
+            });
+            let data = await res.json();
+            if(res.ok) {
+                alert(`Тариф ${name} успешно активирован!`);
+                window.location.href = "/";
+            } else {
+                alert("Ошибка: " + data.detail);
+            }
+        }
+    </script>
+</body>
+</html>

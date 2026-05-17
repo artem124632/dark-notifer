@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Промокоды | DARK</title>
+    <style>
+        :root {
+            --bg-main: #060814;
+            --bg-card: #0b0e22;
+            --bg-input: #121834;
+            --text-color: #ffffff;
+            --text-muted: #626b8f;
+            --accent: #2e66ff;
+            --accent-hover: #1a4fd6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border: #1a224c;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column; }
+
+        header { background-color: var(--bg-card); border-bottom: 1px solid var(--border); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 30px; }
+        .logo { font-size: 22px; font-weight: 800; letter-spacing: 2px; color: #fff; text-decoration: none; }
+        nav { display: flex; gap: 20px; }
+        nav a { color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500; }
+        nav a:hover, nav a.active { color: var(--text-color); }
+        {% if is_owner == 1 or is_moderator == 1 %} nav a.admin-link { color: var(--danger); font-weight: 600; } {% endif %}
+        .user-menu { display: flex; align-items: center; gap: 15px; }
+        .user-badge { display: flex; align-items: center; gap: 10px; background: var(--bg-input); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); }
+        .avatar-mini { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid var(--accent); }
+        
+        .announcement-bar { background: linear-gradient(90deg, rgba(46, 102, 255, 0.1), rgba(16, 185, 129, 0.1)); border-bottom: 1px solid var(--border); padding: 10px; text-align: center; font-size: 13px; color: var(--success); }
+
+        main { flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
+        .promo-card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; max-width: 500px; width: 100%; padding: 40px; text-align: center; }
+        .promo-card h2 { font-size: 22px; margin-bottom: 10px; }
+        .promo-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 25px; }
+        
+        .input-group { display: flex; flex-direction: column; gap: 8px; text-align: left; margin-bottom: 25px; }
+        .input-group label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-group input { background-color: var(--bg-input); border: 1px solid var(--border); border-radius: 10px; padding: 16px; color: #fff; font-size: 16px; font-family: monospace; text-transform: uppercase; letter-spacing: 1px; outline: none; }
+        
+        .btn-promo { width: 100%; background-color: var(--accent); color: #fff; border: none; padding: 16px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .btn-promo:hover { background-color: var(--accent-hover); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-section">
+            <a href="/" class="logo">DARK</a>
+            <nav>
+                <a href="/">Главная</a>
+                <a href="/">Подписки</a>
+                <a href="/balance">Баланс</a>
+                <a href="/promocodes" class="active">Промокоды</a>
+                <a href="/support">Техподдержка</a>
+                {% if is_owner == 1 or is_moderator == 1 %} <a href="/admin" class="admin-link">[ADMIN PANEL]</a> {% endif %}
+            </nav>
+        </div>
+        <div class="user-menu">
+            <div class="user-badge">
+                <img src="{{ avatar }}" class="avatar-mini" alt="Avatar">
+                <span class="username-txt">{{ username }}</span>
+            </div>
+            <a href="/logout" class="btn-logout" style="color:var(--text-muted); text-decoration:none; font-size:13px;">Выйти</a>
+        </div>
+    </header>
+
+    <div class="announcement-bar">⚡ {{ global_announcement }}</div>
+
+    <main>
+        <div class="promo-card">
+            <h2>Активация промокода</h2>
+            <p>Введите бонусный или праздничный код для мгновенного пополнения баланса.</p>
+            <div class="input-group">
+                <label>Ваш секретный код</label>
+                <input type="text" id="promo-input" placeholder="DARKXXXX">
+            </div>
+            <button class="btn-promo" onclick="activatePromo()">Активировать код</button>
+        </div>
+    </main>
+
+    <script>
+        async function activatePromo() {
+            let code = document.getElementById("promo-input").value;
+            let res = await fetch("/api/promocodes/use", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ code: code })
+            });
+            let data = await res.json();
+            if(res.ok) {
+                alert(`Успешно! Зачислено: $${data.reward}`);
+                window.location.href = "/";
+            } else {
+                alert("Ошибка: " + data.detail);
+            }
+        }
+    </script>
+</body>
+</html>
